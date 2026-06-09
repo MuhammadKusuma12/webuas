@@ -8,58 +8,93 @@ use Illuminate\Http\Request;
 class ItemController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * READ: Menampilkan semua daftar barang.
      */
     public function index()
     {
-        //
+        // Mengambil semua data dari tabel items
+        $items = Item::all();
+
+        return response()->json([
+            'status' => 'sukses',
+            'pesan'  => 'Berhasil mengambil daftar barang',
+            'data'   => $items
+        ]);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Menampilkan form UI untuk tambah data.
+     * (Kita kembalikan pesan JSON dulu karena UI belum ada)
      */
     public function create()
     {
-        //
+        return response()->json(['pesan' => 'Endpoint ini khusus memanggil halaman form UI tambah data']);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * CREATE: Menyimpan data barang baru ke database.
      */
     public function store(Request $request)
     {
-        //
+        // Catatan: Pastikan validasi disesuaikan dengan nama kolom di database kamu
+        $request->validate([
+            // Contoh validasi dasar:
+            // 'nama_item' => 'required|string',
+            // 'harga' => 'required|numeric',
+        ]);
+
+        $item = Item::create($request->all());
+
+        return response()->json([
+            'status' => 'sukses',
+            'pesan'  => 'Barang baru berhasil ditambahkan',
+            'data'   => $item
+        ], 201); // Status 201 = Created
     }
 
     /**
-     * Display the specified resource.
+     * READ: Menampilkan detail satu barang spesifik.
      */
     public function show(Item $item)
     {
-        //
+        return response()->json([
+            'status' => 'sukses',
+            'data'   => $item
+        ]);
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Menampilkan form UI untuk edit data.
      */
     public function edit(Item $item)
     {
-        //
+        return response()->json(['pesan' => 'Endpoint ini khusus memanggil halaman form UI edit data']);
     }
 
     /**
-     * Update the specified resource in storage.
+     * UPDATE: Memperbarui data barang di database.
      */
     public function update(Request $request, Item $item)
     {
-        //
+        $item->update($request->all());
+
+        return response()->json([
+            'status' => 'sukses',
+            'pesan'  => 'Data barang berhasil diperbarui',
+            'data'   => $item
+        ]);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * DELETE: Menghapus data barang dari database.
      */
     public function destroy(Item $item)
     {
-        //
+        $item->delete();
+
+        return response()->json([
+            'status' => 'sukses',
+            'pesan'  => 'Barang berhasil dihapus'
+        ]);
     }
 }
