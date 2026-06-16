@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
-import { ref } from 'vue';
 
+// Hapus 'ref' karena kita tidak pakai data dummy lagi
 defineOptions({
     layout: {
         breadcrumbs: [
@@ -11,13 +11,10 @@ defineOptions({
     },
 });
 
-// Data dummy sementara
-const mutasiStok = ref([
-    { id: 1, kode_item: 'KOI-001', nama_item: 'Koi Kohaku', jenis_mutasi: 'masuk', jumlah: 10, stok_sebelum: 0, stok_sesudah: 10, keterangan: 'Stok awal', created_at: '2026-06-12' },
-    { id: 2, kode_item: 'KOI-001', nama_item: 'Koi Kohaku', jenis_mutasi: 'keluar', jumlah: 2, stok_sebelum: 10, stok_sesudah: 8, keterangan: 'Terjual', created_at: '2026-06-13' },
-    { id: 3, kode_item: 'KOI-002', nama_item: 'Koi Showa', jenis_mutasi: 'masuk', jumlah: 8, stok_sebelum: 0, stok_sesudah: 8, keterangan: 'Stok awal', created_at: '2026-06-12' },
-    { id: 4, kode_item: 'PKN-001', nama_item: 'Pakan Koi Premium', jenis_mutasi: 'keluar', jumlah: 5, stok_sebelum: 20, stok_sesudah: 15, keterangan: 'Terjual', created_at: '2026-06-14' },
-]);
+// INI KUNCI INTEGRASINYA: Menangkap data 'mutasiStok' yang dikirim dari Controller-mu
+defineProps({
+    mutasiStok: Array
+});
 </script>
 
 <template>

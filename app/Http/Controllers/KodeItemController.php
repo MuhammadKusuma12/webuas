@@ -4,62 +4,70 @@ namespace App\Http\Controllers;
 
 use App\Models\KodeItem;
 use Illuminate\Http\Request;
+use Inertia\Inertia; // Wajib ditambahkan sebagai jembatan ke Vue
 
 class KodeItemController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * READ: Menampilkan daftar Kategori/Kode Item ke halaman Vue
      */
     public function index()
     {
-        dd(KodeItem::all());
+        // Mengambil semua data, diurutkan dari yang terbaru (latest)
+        $kodeItems = KodeItem::latest()->get();
+
+        // Mengirim data ke folder resources/js/Pages/KodeItems/Index.vue
+        return Inertia::render('KodeItems/Index', [
+            'kodeItems' => $kodeItems
+        ]);
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
+     * CREATE: Menyimpan data kategori baru
      */
     public function store(Request $request)
     {
-        //
+        KodeItem::create($request->all());
+
+        return redirect()->route('kode-items.index');
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(KodeItem $kodeItem)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(KodeItem $kodeItem)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
+     * UPDATE: Memperbarui data kategori
      */
     public function update(Request $request, KodeItem $kodeItem)
     {
-        //
+        $kodeItem->update($request->all());
+
+        return redirect()->route('kode-items.index');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * DELETE: Menghapus data kategori
      */
     public function destroy(KodeItem $kodeItem)
     {
-        //
+        $kodeItem->delete();
+
+        return redirect()->route('kode-items.index');
+    }
+
+    // =========================================================================
+    // FUNGSI DI BAWAH INI KOSONG KARENA ARIN MENGGUNAKAN SISTEM POP-UP (MODAL)
+    // =========================================================================
+
+    public function create()
+    {
+        return redirect()->route('kode-items.index');
+    }
+
+    public function edit(KodeItem $kodeItem)
+    {
+        return redirect()->route('kode-items.index');
+    }
+
+    public function show(KodeItem $kodeItem)
+    {
+        return redirect()->route('kode-items.index');
     }
 }
