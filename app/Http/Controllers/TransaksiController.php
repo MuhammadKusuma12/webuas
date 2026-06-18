@@ -9,34 +9,30 @@ use App\Models\MutasiStok;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Inertia\Inertia; // Wajib ditambahkan sebagai jembatan ke Vue
 
 class TransaksiController extends Controller
 {
     /**
-     * READ: Menampilkan semua daftar transaksi.
+     * READ: Menampilkan daftar riwayat transaksi ke halaman Vue.
      */
     public function index()
     {
-        $transaksi = Transaksi::all();
+        // Mengambil data transaksi beserta detail item yang dibeli, diurutkan dari yang terbaru
+        $transaksi = Transaksi::with('detailTransaksi')->latest()->get();
 
-        return response()->json([
-            'status' => 'sukses',
-            'pesan'  => 'Berhasil mengambil daftar transaksi',
-            'data'   => $transaksi
+        // Mengirim data ke folder resources/js/Pages/Transaksi/Index.vue
+        return Inertia::render('Transaksi/Index', [
+            'transaksi' => $transaksi
         ]);
     }
 
-    public function create()
-    {
-        return response()->json(['pesan' => 'Endpoint untuk halaman form tambah transaksi']);
-    }
-
     /**
-     * CREATE: Menyimpan transaksi baru (Logika Kasir Final)
+     * CREATE: Menyimpan transaksi baru (Logika Kasir Final - Tetap Aman)
      */
     public function store(Request $request)
     {
-        // 1. Validasi data yang dikirim oleh kasir
+        // 1. Validasi data
         $request->validate([
             'user_id' => 'required|integer',
             'bayar' => 'required|numeric|min:0',
@@ -73,7 +69,7 @@ class TransaksiController extends Controller
 
             // Cek apakah uangnya cukup
             if ($request->bayar < $total_harga) {
-                throw new \Exception("Uang pembayaran kurang! Total belanja: {$total_harga}");
+                throw new \Exception("Uang pembayaran kurang! Total belanja: Rp" . number_format($total_harga, 0, ',', '.'));
             }
 
             // 3. Buat Nota Induk (Transaksi)
@@ -106,7 +102,7 @@ class TransaksiController extends Controller
                 $item->stok = $stok_awal - $qty;
                 $item->save();
 
-                // C. Catat Riwayat Mutasi Stok (Sudah diperbaiki batas hurufnya)
+                // C. Catat Riwayat Mutasi Stok
                 MutasiStok::create([
                     'item_id' => $item->id,
                     'user_id' => $request->user_id,
@@ -123,54 +119,46 @@ class TransaksiController extends Controller
             // Kunci semua perubahan secara permanen
             DB::commit();
 
-            return response()->json([
-                'status' => 'sukses',
-                'pesan' => 'Transaksi berhasil diproses',
-                'data' => $transaksi
-            ], 201);
+            // MENGUBAH RETURN: Redirect ke halaman tabel tanpa error
+            return redirect()->route('transaksi.index');
 
         } catch (\Exception $e) {
-            // Batalkan semua proses jika ada error di tengah jalan
+            // Batalkan semua proses jika ada error
             DB::rollBack();
 
-            return response()->json([
-                'status' => 'gagal',
-                'pesan' => $e->getMessage()
-            ], 400);
+            // MENGUBAH RETURN: Kembalikan ke halaman tabel dengan membawa pesan error
+            return redirect()->back()->withErrors(['transaksi_error' => $e->getMessage()]);
         }
     }
 
-    /**
-     * READ: Menampilkan detail satu nota transaksi spesifik.
-     */
+    // =========================================================================
+    // FUNGSI DI BAWAH INI DINONAKTIFKAN KARENA UI MENGGUNAKAN POP-UP (MODAL) VUE
+    // =========================================================================
+
     public function show(Transaksi $transaksi)
     {
-        return response()->json([
-            'status' => 'sukses',
-            'data'   => $transaksi
-        ]);
+        return redirect()->route('transaksi.index');
+    }
+
+    public function create()
+    {
+        return redirect()->route('transaksi.index');
     }
 
     public function edit(Transaksi $transaksi)
     {
-        return response()->json(['pesan' => 'Endpoint untuk halaman form edit transaksi']);
+        return redirect()->route('transaksi.index');
     }
 
     public function update(Request $request, Transaksi $transaksi)
     {
-        return response()->json(['pesan' => 'Logika update transaksi belum dirakit']);
+        return redirect()->route('transaksi.index');
     }
 
-    /**
-     * DELETE: Menghapus atau membatalkan transaksi.
-     */
     public function destroy(Transaksi $transaksi)
     {
-        $transaksi->delete();
-
-        return response()->json([
-            'status' => 'sukses',
-            'pesan'  => 'Transaksi berhasil dibatalkan/dihapus'
-        ]);
+        // Menghapus data transaksi (Opsional, tergantung kebijakan toko)
+        // $transaksi->delete(); 
+        return redirect()->route('transaksi.index');
     }
 }

@@ -11,18 +11,15 @@ defineOptions({
     },
 });
 
-const mutasiStok = ref([
-    { id: 1, kode_item: 'KOI-001', nama_item: 'Koi Kohaku', jenis_mutasi: 'masuk', jumlah: 10, stok_sebelum: 0, stok_sesudah: 10, keterangan: 'Stok awal', created_at: '2026-06-12' },
-    { id: 2, kode_item: 'KOI-001', nama_item: 'Koi Kohaku', jenis_mutasi: 'keluar', jumlah: 2, stok_sebelum: 10, stok_sesudah: 8, keterangan: 'Terjual', created_at: '2026-06-13' },
-    { id: 3, kode_item: 'KOI-002', nama_item: 'Koi Showa', jenis_mutasi: 'masuk', jumlah: 8, stok_sebelum: 0, stok_sesudah: 8, keterangan: 'Stok awal', created_at: '2026-06-12' },
-    { id: 4, kode_item: 'PKN-001', nama_item: 'Pakan Koi Premium', jenis_mutasi: 'keluar', jumlah: 5, stok_sebelum: 20, stok_sesudah: 15, keterangan: 'Terjual', created_at: '2026-06-14' },
-]);
+const props = defineProps({
+    mutasiStok: Array,
+});
 
 const filterJenis = ref('semua');
 
 const filtered = computed(() => {
-    if (filterJenis.value === 'semua') return mutasiStok.value;
-    return mutasiStok.value.filter(m => m.jenis_mutasi === filterJenis.value);
+    if (filterJenis.value === 'semua') return props.mutasiStok;
+    return props.mutasiStok.filter((m: any) => m.jenis_mutasi === filterJenis.value);
 });
 </script>
 
