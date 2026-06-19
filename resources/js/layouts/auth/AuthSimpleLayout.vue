@@ -2,13 +2,11 @@
 import { Link } from '@inertiajs/vue3';
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import { home } from '@/routes';
-
 defineProps<{
     title?: string;
     description?: string;
 }>();
 </script>
-
 <template>
     <div
         class="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10"
@@ -21,13 +19,13 @@ defineProps<{
                         class="flex flex-col items-center gap-2 font-medium"
                     >
                         <div
-                            class="mb-1 flex h-9 w-9 items-center justify-center rounded-md"
+                            class="mb-1 flex h-9 w-9 items-center justify-center rounded-md bg-black"
                         >
                             <AppLogoIcon
-                                class="size-9 fill-current text-[var(--foreground)] dark:text-white"
+                                class="size-9 fill-current text-white"
                             />
                         </div>
-                        <span class="sr-only">{{ title }}</span>
+                        <span class="text-lg font-bold">Toko Ikan Koi</span>
                     </Link>
                     <div class="space-y-2 text-center">
                         <h1 class="text-xl font-medium">{{ title }}</h1>

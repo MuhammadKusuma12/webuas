@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
 defineOptions({
@@ -38,7 +38,15 @@ function openEdit(item: any) {
 }
 
 function simpan() {
-    showModal.value = false;
+    if (isEdit.value) {
+        router.put(`/kode-items/${form.value.id}`, form.value, {
+            onSuccess: () => { showModal.value = false; }
+        });
+    } else {
+        router.post('/kode-items', form.value, {
+            onSuccess: () => { showModal.value = false; }
+        });
+    }
 }
 
 function konfirmasiHapus(id: number) {
@@ -47,7 +55,11 @@ function konfirmasiHapus(id: number) {
 }
 
 function hapus() {
-    showDeleteConfirm.value = false;
+    if (selectedId.value) {
+        router.delete(`/kode-items/${selectedId.value}`, {
+            onSuccess: () => { showDeleteConfirm.value = false; }
+        });
+    }
 }
 </script>
 

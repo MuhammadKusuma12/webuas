@@ -18,13 +18,13 @@ class TransaksiController extends Controller
      */
     public function index()
     {
-        // Mengambil data transaksi beserta detail item yang dibeli, diurutkan dari yang terbaru
-        $transaksi = Transaksi::with('detailTransaksi')->latest()->get();
+    	$transaksi = Transaksi::with('detailTransaksi')->latest()->get();
+   	$items = Item::all();
 
-        // Mengirim data ke folder resources/js/Pages/Transaksi/Index.vue
-        return Inertia::render('Transaksi/Index', [
-            'transaksi' => $transaksi
-        ]);
+    	return Inertia::render('Transaksi/Index', [
+           'transaksi' => $transaksi,
+           'items' => $items,
+    ]);
     }
 
     /**
