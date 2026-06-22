@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Item;
 use App\Models\Transaksi;
+use App\Models\MutasiStok; // TAMBAHAN WAJIB: Memanggil tabel Buku Besar
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -11,9 +12,6 @@ use Inertia\Inertia;
 
 class PembelianController extends Controller
 {
-    /**
-     * Tampilkan form jumlah beli
-     */
     public function create(Item $item)
     {
         return Inertia::render('Pembelian', [
@@ -21,9 +19,6 @@ class PembelianController extends Controller
         ]);
     }
 
-    /**
-     * Proses submit pembelian — status awal: menunggu_pembayaran
-     */
     public function store(Request $request, Item $item)
     {
         $validated = $request->validate([
@@ -33,6 +28,7 @@ class PembelianController extends Controller
         try {
             $transaksi = DB::transaction(function () use ($validated, $item) {
 
+                // 1. Kunci baris item ini
                 $item = Item::lockForUpdate()->find($item->id);
 
                 if ($validated['qty'] > $item->stok) {
@@ -41,15 +37,23 @@ class PembelianController extends Controller
 
                 $subtotal = $item->harga_jual * $validated['qty'];
 
-                // Nominal unik: tambah angka random 1-999 biar mudah diverifikasi
-                $nominal_unik = $subtotal + rand(1, 999);
+                // 2. Generate kode unik anti-tabrakan
+                do {
+                    $kodeUnik = rand(100, 999);
+                    $sudahDipakai = Transaksi::where('kode_unik', $kodeUnik)
+                        ->where('status', 'menunggu_pembayaran')
+                        ->exists();
+                } while ($sudahDipakai);
 
+                // 3. Buat Nota Transaksi Terlebih Dahulu
                 $transaksi = Transaksi::create([
                     'nomor_invoice'     => 'INV-' . strtoupper(uniqid()),
                     'user_id'           => Auth::id(),
                     'sumber'            => 'online',
                     'status'            => 'menunggu_pembayaran',
-                    'total_harga'       => $nominal_unik,
+                    'metode_bayar'      => 'transfer_bca',
+                    'kode_unik'         => $kodeUnik,
+                    'total_harga'       => $subtotal,
                     'bayar'             => 0,
                     'kembalian'         => 0,
                     'tanggal_transaksi' => now(),
@@ -62,13 +66,28 @@ class PembelianController extends Controller
                     'qty'       => $validated['qty'],
                 ]);
 
-                // Stok BELUM dikurangi — dikurangi setelah pembayaran dikonfirmasi
+                // 4. RESERVASI: Potong Stok
+                $stok_awal = $item->stok;
+                $item->decrement('stok', $validated['qty']);
+
+                // 5. PENAMBALAN LOGIKA: Catat ke Buku Besar (Mutasi Stok)
+                MutasiStok::create([
+                    'item_id'        => $item->id,
+                    'user_id'        => Auth::id(),
+                    'jenis_mutasi'   => 'keluar',
+                    'alasan_mutasi'  => 'Penjualan',
+                    'jumlah'         => $validated['qty'],
+                    'stok_sebelum'   => $stok_awal,
+                    'stok_sesudah'   => $item->stok,
+                    'tanggal_mutasi' => now(),
+                    'keterangan'     => "Reservasi Online (Inv: {$transaksi->nomor_invoice})",
+                ]);
 
                 return $transaksi;
             });
 
             return redirect()->route('pembayaran.show', $transaksi->id)
-                ->with('success', "Pesanan dibuat! Silakan selesaikan pembayaran.");
+                ->with('success', 'Pesanan dibuat! Silakan selesaikan pembayaran.');
 
         } catch (\Exception $e) {
             return back()->withErrors([
@@ -77,62 +96,48 @@ class PembelianController extends Controller
         }
     }
 
-    /**
-     * Halaman instruksi pembayaran
-     */
     public function pembayaran(Transaksi $transaksi)
     {
-        if ($transaksi->user_id !== Auth::id()) {
-            abort(403);
+        if ($transaksi->user_id !== Auth::id()) { abort(403); }
+        if ($transaksi->status !== 'menunggu_pembayaran') {
+            return redirect()->route('pesanan.index');
         }
 
         $transaksi->load('detailTransaksi');
 
         return Inertia::render('Pembayaran', [
-            'transaksi' => $transaksi,
+            'transaksi'       => $transaksi,
+            'nominalTransfer' => $transaksi->total_harga + $transaksi->kode_unik,
+            'rekeningTujuan'  => [
+                'bank'      => 'BCA',
+                'nomor'     => '1234567890',
+                'atasnama'  => 'Toko Ikan Koi',
+            ],
         ]);
     }
 
-    /**
-     * Konfirmasi "Saya Sudah Transfer" — potong stok & ubah status
-     */
-    public function konfirmasiTransfer(Transaksi $transaksi)
+    public function konfirmasiPembayaran(Transaksi $transaksi)
     {
-        if ($transaksi->user_id !== Auth::id()) {
-            abort(403);
-        }
-
+        if ($transaksi->user_id !== Auth::id()) { abort(403); }
         if ($transaksi->status !== 'menunggu_pembayaran') {
             return back()->withErrors(['error' => 'Transaksi ini sudah diproses.']);
         }
 
-        DB::transaction(function () use ($transaksi) {
-            $transaksi->load('detailTransaksi');
-
-            // Potong stok setelah konfirmasi transfer
-            foreach ($transaksi->detailTransaksi as $detail) {
-                $item = Item::lockForUpdate()->find($detail->item_id);
-                if ($item) {
-                    if ($item->stok < $detail->qty) {
-                        throw new \Exception("Stok {$item->nama_item} tidak mencukupi saat konfirmasi.");
-                    }
-                    $item->decrement('stok', $detail->qty);
-                }
-            }
-
-            $transaksi->update([
-                'status' => 'menunggu_konfirmasi',
-                'bayar'  => $transaksi->total_harga,
-            ]);
-        });
+        try {
+            DB::transaction(function () use ($transaksi) {
+                $transaksi->update([
+                    'status' => 'menunggu_konfirmasi',
+                    'bayar'  => $transaksi->total_harga + $transaksi->kode_unik,
+                ]);
+            });
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
 
         return redirect()->route('pesanan.index')
             ->with('success', 'Konfirmasi transfer berhasil! Pesanan sedang diverifikasi admin.');
     }
 
-    /**
-     * Tampilkan struk/invoice
-     */
     public function struk(Transaksi $transaksi)
     {
         if ($transaksi->user_id !== Auth::id() && !in_array(Auth::user()->role, ['admin', 'pegawai'])) {
@@ -146,9 +151,6 @@ class PembelianController extends Controller
         ]);
     }
 
-    /**
-     * Riwayat pembelian milik user yang login
-     */
     public function riwayat()
     {
         $transaksi = Transaksi::where('user_id', Auth::id())

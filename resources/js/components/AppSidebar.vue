@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import { Link, usePage } from '@inertiajs/vue3';
 import { LayoutGrid, Fish, Tag, ShoppingCart, ArrowLeftRight } from '@lucide/vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
@@ -17,33 +18,48 @@ import {
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
-    {
-        title: 'Items',
-        href: '/items',
-        icon: Fish,
-    },
-    {
-        title: 'Kode Items',
-        href: '/kode-items',
-        icon: Tag,
-    },
-    {
-        title: 'Transaksi',
-        href: '/transaksi',
-        icon: ShoppingCart,
-    },
-    {
-        title: 'Mutasi Stok',
-        href: '/mutasi-stok',
-        icon: ArrowLeftRight,
-    },
-];
+// 1. Ambil data user yang sedang login
+const page = usePage();
+const userRole = page.props.auth.user.role;
+
+// 2. Gunakan "computed" agar daftar menu menyesuaikan dengan role user
+const mainNavItems = computed<NavItem[]>(() => {
+    const items: NavItem[] = [
+        {
+            title: 'Dashboard',
+            href: dashboard(),
+            icon: LayoutGrid,
+        },
+        {
+            title: 'Items',
+            href: '/items',
+            icon: Fish,
+        },
+        {
+            title: 'Kode Items',
+            href: '/kode-items',
+            icon: Tag,
+        },
+        {
+            title: 'Transaksi',
+            href: '/transaksi',
+            icon: ShoppingCart,
+        },
+        {
+            title: 'Mutasi Stok',
+            href: '/mutasi-stok',
+            icon: ArrowLeftRight,
+        },
+    ];
+
+    // Jika admin, tampilkan semua menu
+    if (userRole === 'admin') {
+        return items;
+    } 
+    
+    // Jika pegawai, filter dan HANYA tampilkan Dashboard & Transaksi
+    return items.filter(item => item.title === 'Dashboard' || item.title === 'Transaksi');
+});
 
 const footerNavItems: NavItem[] = [];
 </script>
@@ -64,6 +80,7 @@ const footerNavItems: NavItem[] = [];
         </SidebarHeader>
 
         <SidebarContent>
+            <!-- NavMain sekarang akan otomatis membaca hasil filter dari computed -->
             <NavMain :items="mainNavItems" />
         </SidebarContent>
 

@@ -9,7 +9,7 @@ use App\Models\MutasiStok;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-use Inertia\Inertia; // Wajib ditambahkan sebagai jembatan ke Vue
+use Inertia\Inertia;
 
 class TransaksiController extends Controller
 {
@@ -18,17 +18,17 @@ class TransaksiController extends Controller
      */
     public function index()
     {
-    	$transaksi = Transaksi::with('detailTransaksi')->latest()->get();
-   	$items = Item::all();
+        $transaksi = Transaksi::with('detailTransaksi')->latest()->get();
+        $items = Item::all();
 
-    	return Inertia::render('Transaksi/Index', [
-           'transaksi' => $transaksi,
-           'items' => $items,
-    ]);
+        return Inertia::render('Transaksi/Index', [
+            'transaksi' => $transaksi,
+            'items' => $items,
+        ]);
     }
 
     /**
-     * CREATE: Menyimpan transaksi baru (Logika Kasir Final - Tetap Aman)
+     * CREATE: Menyimpan transaksi baru (Logika Kasir Final - Anti Race Condition)
      */
     public function store(Request $request)
     {
@@ -48,9 +48,10 @@ class TransaksiController extends Controller
             $total_harga = 0;
             $items_dibelis = [];
 
-            // 2. Cek stok dan hitung total belanjaan
+            // 2. Cek stok dan hitung total belanjaan (DENGAN LOCKING)
             foreach ($request->items as $beli) {
-                $item_db = Item::find($beli['item_id']);
+                // PERBAIKAN ISU #5: Mengunci baris item agar tidak direbut transaksi lain
+                $item_db = Item::lockForUpdate()->find($beli['item_id']);
 
                 if ($item_db->stok < $beli['qty']) {
                     throw new \Exception("Stok {$item_db->nama_item} tidak mencukupi! Sisa stok: {$item_db->stok}");
@@ -76,6 +77,8 @@ class TransaksiController extends Controller
             $transaksi = Transaksi::create([
                 'nomor_invoice' => 'INV-' . Carbon::now()->format('Ymd') . '-' . rand(1000, 9999),
                 'user_id' => $request->user_id,
+                'sumber' => 'offline', // PERBAIKAN ISU #4: Identifikasi transaksi kasir
+                'status' => 'selesai', // Transaksi kasir langsung dianggap selesai
                 'total_harga' => $total_harga,
                 'bayar' => $request->bayar,
                 'kembalian' => $request->bayar - $total_harga,
@@ -112,21 +115,19 @@ class TransaksiController extends Controller
                     'stok_sebelum' => $stok_awal,
                     'stok_sesudah' => $item->stok,
                     'tanggal_mutasi' => Carbon::now(),
-                    'keterangan' => "Terjual {$qty} ekor (Inv: {$transaksi->nomor_invoice})",
+                    'keterangan' => "Terjual {$qty} ekor (Inv: {$transaksi->nomor_invoice}) via Kasir",
                 ]);
             }
 
             // Kunci semua perubahan secara permanen
             DB::commit();
 
-            // MENGUBAH RETURN: Redirect ke halaman tabel tanpa error
             return redirect()->route('transaksi.index');
 
         } catch (\Exception $e) {
             // Batalkan semua proses jika ada error
             DB::rollBack();
 
-            // MENGUBAH RETURN: Kembalikan ke halaman tabel dengan membawa pesan error
             return redirect()->back()->withErrors(['transaksi_error' => $e->getMessage()]);
         }
     }
@@ -155,10 +156,61 @@ class TransaksiController extends Controller
         return redirect()->route('transaksi.index');
     }
 
+    /**
+     * DELETE: Mencegah penghapusan untuk integritas laporan keuangan
+     */
     public function destroy(Transaksi $transaksi)
     {
-        // Menghapus data transaksi (Opsional, tergantung kebijakan toko)
-        // $transaksi->delete(); 
-        return redirect()->route('transaksi.index');
+        // PERBAIKAN ISU #6: Menolak perintah hapus secara elegan
+        return redirect()->back()->withErrors([
+            'error' => 'Akses ditolak! Transaksi yang sudah tersimpan tidak dapat dihapus untuk menjaga integritas laporan mutasi dan keuangan.'
+        ]);
+    }
+
+    /**
+     * EKSEKUSI ADMIN: Menerima pesanan online
+     */
+    public function terima(Transaksi $transaksi)
+    {
+        if ($transaksi->status !== 'menunggu_konfirmasi') {
+            return redirect()->back()->withErrors(['error' => 'Status transaksi tidak valid untuk diterima.']);
+        }
+
+        $transaksi->update(['status' => 'selesai']);
+
+        return redirect()->back()->with('success', 'Pesanan online berhasil diverifikasi dan diselesaikan.');
+    }
+
+    /**
+     * EKSEKUSI ADMIN: Menolak pesanan online (Stok wajib kembali)
+     */
+    public function tolak(Transaksi $transaksi)
+    {
+        if ($transaksi->status !== 'menunggu_konfirmasi') {
+            return redirect()->back()->withErrors(['error' => 'Status transaksi tidak valid untuk ditolak.']);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            // 1. Kembalikan stok item
+            $transaksi->load('detailTransaksi');
+            foreach ($transaksi->detailTransaksi as $detail) {
+                $item = Item::lockForUpdate()->find($detail->item_id);
+                if ($item) {
+                    $item->increment('stok', $detail->qty);
+                }
+            }
+
+            // 2. Ubah status jadi batal
+            $transaksi->update(['status' => 'dibatalkan']);
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Pesanan ditolak. Uang tidak valid dan stok telah dikembalikan ke etalase.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withErrors(['error' => 'Gagal menolak pesanan: ' . $e->getMessage()]);
+        }
     }
 }

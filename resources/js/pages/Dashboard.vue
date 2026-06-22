@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import { dashboard } from '@/routes';
 
 defineProps<{
@@ -46,32 +46,39 @@ function formatRupiah(num: number) {
 
     <div class="flex flex-col gap-8 p-6 min-h-full bg-[#f8f9ff]">
 
-        <!-- Header -->
         <header class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div>
                 <h2 class="text-[32px] font-semibold leading-10 text-[#0b1c30]" style="font-family: 'Plus Jakarta Sans', sans-serif;">
                     Dashboard Overview
                 </h2>
                 <p class="text-base text-[#3f484a] mt-1" style="font-family: 'Inter', sans-serif;">
-                    Welcome back, Administrator. Here is your shop summary.
+                    Welcome back, {{ $page.props.auth.user.nama || 'Administrator' }}. Here is your shop summary.
                 </p>
             </div>
             <div class="flex gap-3">
+                <Link href="/" class="flex items-center gap-2 px-4 py-2 bg-[#dce9ff] border border-[#bfc8c9] rounded-lg text-sm font-semibold text-[#0b1c30] hover:bg-[#cce0ff] transition-colors shadow-sm">
+                    <span class="material-symbols-outlined text-[#0b1c30]" style="font-size:18px;">storefront</span>
+                    Lihat Toko
+                </Link>
+
                 <button class="flex items-center gap-2 px-4 py-2 bg-white border border-[#bfc8c9] rounded-lg text-sm font-medium text-[#0b1c30] hover:bg-[#e5eeff] transition-colors shadow-sm">
                     <span class="material-symbols-outlined text-[#004349]" style="font-size:18px;">calendar_today</span>
                     {{ new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) }}
                 </button>
-                <button class="flex items-center gap-2 px-5 py-2 bg-[#004349] text-white rounded-lg text-sm font-semibold hover:bg-[#0d5c63] active:scale-95 transition-all shadow-sm">
+                
+                <Link 
+                    v-if="$page.props.auth.user.role === 'admin'"
+                    href="/items/create" 
+                    class="flex items-center gap-2 px-5 py-2 bg-[#004349] text-white rounded-lg text-sm font-semibold hover:bg-[#0d5c63] active:scale-95 transition-all shadow-sm"
+                >
                     <span class="material-symbols-outlined" style="font-size:18px;">add</span>
                     Input New Fish
-                </button>
+                </Link>
             </div>
         </header>
 
-        <!-- Stat Cards -->
         <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-            <!-- Total Stok Ikan -->
             <div class="zen-stat-card bg-white rounded-xl p-6 shadow-sm border border-[#e5eeff] border-l-4 border-l-[#004349] flex flex-col justify-between h-44 hover:shadow-md transition-shadow">
                 <div class="flex justify-between items-start">
                     <div class="bg-[#abeef6] p-3 rounded-lg">
@@ -85,7 +92,6 @@ function formatRupiah(num: number) {
                 </div>
             </div>
 
-            <!-- Total Transaksi -->
             <div class="zen-stat-card bg-white rounded-xl p-6 shadow-sm border border-[#e5eeff] border-l-4 border-l-[#934a29] flex flex-col justify-between h-44 hover:shadow-md transition-shadow">
                 <div class="flex justify-between items-start">
                     <div class="bg-[#ffdbce] p-3 rounded-lg">
@@ -99,7 +105,6 @@ function formatRupiah(num: number) {
                 </div>
             </div>
 
-            <!-- Total Jenis Koi -->
             <div class="zen-stat-card bg-white rounded-xl p-6 shadow-sm border border-[#e5eeff] border-l-4 border-l-[#004443] flex flex-col justify-between h-44 hover:shadow-md transition-shadow">
                 <div class="flex justify-between items-start">
                     <div class="bg-[#98f2f0] p-3 rounded-lg">
@@ -114,10 +119,8 @@ function formatRupiah(num: number) {
 
         </section>
 
-        <!-- Bottom Grid: Transaksi Terbaru + Side Panel -->
         <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-            <!-- Tabel Transaksi Terbaru -->
             <div class="lg:col-span-2 bg-white rounded-xl border border-[#e5eeff] shadow-sm overflow-hidden">
                 <div class="flex items-center justify-between px-6 py-4 border-b border-[#e5eeff]">
                     <h3 class="text-lg font-semibold text-[#0b1c30]" style="font-family: 'Plus Jakarta Sans', sans-serif;">
@@ -169,12 +172,9 @@ function formatRupiah(num: number) {
                 </table>
             </div>
 
-            <!-- Side Panel -->
             <div class="flex flex-col gap-6">
 
-                <!-- Premium Stock Card -->
                 <div class="relative rounded-xl overflow-hidden h-48 bg-[#004349] shadow-md flex flex-col justify-end p-5">
-                    <!-- Background overlay -->
                     <div class="absolute inset-0 bg-gradient-to-t from-[#002023]/90 via-[#004349]/50 to-transparent z-10"></div>
                     <div class="relative z-20">
                         <span class="inline-block bg-[#934a29] text-white text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded mb-2">
@@ -193,7 +193,6 @@ function formatRupiah(num: number) {
                     </div>
                 </div>
 
-                <!-- Market Trends -->
                 <div class="bg-white rounded-xl border border-[#e5eeff] p-5 shadow-sm border-t-4 border-t-[#004443]">
                     <div class="flex items-center gap-2 mb-4">
                         <span class="material-symbols-outlined text-[#004349]" style="font-size:20px;">trending_up</span>

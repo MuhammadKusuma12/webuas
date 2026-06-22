@@ -21,14 +21,16 @@ class Transaksi extends Model
     protected $fillable = [
     'nomor_invoice',
     'user_id',
-    'sumber',        // tambah ini
-    'status',        // tambah ini
+    'sumber',
+    'status',
+    'metode_bayar',   // tambah
+    'kode_unik',      // tambah
     'total_harga',
     'bayar',
     'kembalian',
     'tanggal_transaksi',
     'created_at',
-   ];
+    ];
 
     /**
      * Type casting

@@ -66,7 +66,7 @@ function handleBeli(itemId: number) {
                 </template>
 
                 <template v-else>
-                    <span style="font-size: 0.875rem; font-weight: 500; color: #3f484a;">
+                    <span style="font-size: 0.875rem; font-weight: 500; color: #3f484a; margin-right: 8px;">
                         Halo, {{ $page.props.auth.user.nama || $page.props.auth.user.username }}!
                     </span>
 
@@ -157,9 +157,9 @@ function handleBeli(itemId: number) {
 
                             <div
                                 v-else
-                                style="width: 100%; background: #e5eeff; color: #3f484a; padding: 9px; border-radius: 8px; font-size: 0.875rem; font-weight: 500; text-align: center;"
+                                style="width: 100%; background: #e5eeff; color: #004349; padding: 9px; border-radius: 8px; font-size: 0.875rem; font-weight: 600; text-align: center;"
                             >
-                                Produk tersedia
+                                ⚙️ Kelola via Dashboard
                             </div>
                         </div>
                     </div>

@@ -76,13 +76,25 @@ function lihatDetail(trx: any) {
     selectedTrx.value = trx;
     showDetail.value = true;
 }
+
+// LOGIKA BARU: Fungsi untuk tombol Terima dan Tolak
+function terimaPesanan(id: number) {
+    if (confirm('Validasi pembayaran berhasil? Pesanan ini akan diselesaikan.')) {
+        router.post(`/transaksi/${id}/terima`);
+    }
+}
+
+function tolakPesanan(id: number) {
+    if (confirm('Tolak pesanan ini? Stok barang akan dikembalikan secara otomatis.')) {
+        router.post(`/transaksi/${id}/tolak`);
+    }
+}
 </script>
 
 <template>
     <Head title="Transaksi" />
     <div class="flex flex-col gap-5 p-6" style="font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;">
 
-        <!-- Header -->
         <div class="flex items-center justify-between">
             <div>
                 <h1 style="font-size: 1.5rem; font-weight: 700; color: #0b1c30;">Daftar Transaksi</h1>
@@ -93,21 +105,19 @@ function lihatDetail(trx: any) {
                 style="background: #004349; color: #fff; padding: 9px 18px; border-radius: 8px; font-size: 0.875rem; font-weight: 600; border: none; cursor: pointer;"
                 class="hover:opacity-90 transition-opacity"
             >
-                + Transaksi Baru
+                + Transaksi Baru (Kasir)
             </button>
         </div>
 
-        <!-- Tabel -->
-        <div style="background: #fff; border: 1px solid #bfc8c9; border-radius: 12px; overflow: hidden;">
-            <table class="w-full" style="font-size: 0.875rem; border-collapse: collapse;">
+        <div style="background: #fff; border: 1px solid #bfc8c9; border-radius: 12px; overflow: hidden; overflow-x: auto;">
+            <table class="w-full" style="font-size: 0.875rem; border-collapse: collapse; min-width: 800px;">
                 <thead>
                     <tr style="background: #eff4ff;">
-                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #3f484a; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em;">No. Invoice</th>
-                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #3f484a; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em;">Total Harga</th>
-                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #3f484a; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em;">Bayar</th>
-                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #3f484a; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em;">Kembalian</th>
-                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #3f484a; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em;">Tanggal</th>
-                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #3f484a; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em;">Aksi</th>
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #3f484a; font-size: 0.8rem; text-transform: uppercase;">No. Invoice</th>
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #3f484a; font-size: 0.8rem; text-transform: uppercase;">Status</th>
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #3f484a; font-size: 0.8rem; text-transform: uppercase;">Total Harga</th>
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #3f484a; font-size: 0.8rem; text-transform: uppercase;">Tanggal</th>
+                        <th style="padding: 12px 16px; text-align: center; font-weight: 600; color: #3f484a; font-size: 0.8rem; text-transform: uppercase;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -118,26 +128,41 @@ function lihatDetail(trx: any) {
                         class="hover:bg-[#f8f9ff]"
                     >
                         <td style="padding: 12px 16px;">
-                            <span style="font-weight: 700; color: #004349; font-family: monospace; font-size: 0.8rem;">{{ trx.nomor_invoice }}</span>
+                            <span style="font-weight: 700; color: #004349; font-family: monospace; font-size: 0.85rem;">{{ trx.nomor_invoice }}</span>
+                            <div style="font-size: 0.7rem; color: #90a4b4; margin-top: 2px;">
+                                Sumber: {{ trx.sumber === 'online' ? '🌐 Web' : '🏪 Kasir' }}
+                            </div>
                         </td>
+                        
+                        <td style="padding: 12px 16px;">
+                            <span v-if="trx.status === 'selesai'" style="background: #d3f9d8; color: #2b8a3e; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">Selesai</span>
+                            <span v-else-if="trx.status === 'menunggu_pembayaran'" style="background: #fff3cd; color: #856404; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">Menunggu Bayar</span>
+                            <span v-else-if="trx.status === 'menunggu_konfirmasi'" style="background: #cce5ff; color: #004085; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">Butuh Verifikasi</span>
+                            <span v-else style="background: #f8d7da; color: #721c24; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">Dibatalkan</span>
+                        </td>
+
                         <td style="padding: 12px 16px; font-weight: 600; color: #0b1c30;">Rp {{ Number(trx.total_harga).toLocaleString('id-ID') }}</td>
-                        <td style="padding: 12px 16px; color: #3f484a;">Rp {{ Number(trx.bayar).toLocaleString('id-ID') }}</td>
-                        <td style="padding: 12px 16px;">
-                            <span style="color: #004349; font-weight: 600;">Rp {{ Number(trx.kembalian).toLocaleString('id-ID') }}</span>
-                        </td>
                         <td style="padding: 12px 16px; color: #3f484a; font-size: 0.8rem;">{{ new Date(trx.tanggal_transaksi).toLocaleDateString('id-ID') }}</td>
-                        <td style="padding: 12px 16px;">
-                            <button
-                                @click="lihatDetail(trx)"
-                                style="color: #004349; font-size: 0.8rem; font-weight: 600; background: none; border: none; cursor: pointer;"
-                                class="hover:underline"
-                            >
-                                Detail
-                            </button>
+                        
+                        <td style="padding: 12px 16px; text-align: center;">
+                            <div class="flex items-center justify-center gap-3">
+                                <button @click="lihatDetail(trx)" style="color: #0b1c30; font-size: 0.8rem; font-weight: 600; background: none; border: none; cursor: pointer;" class="hover:underline">
+                                    Detail
+                                </button>
+                                
+                                <template v-if="trx.status === 'menunggu_konfirmasi'">
+                                    <button @click="terimaPesanan(trx.id)" style="color: #2b8a3e; font-size: 0.8rem; font-weight: 700; background: none; border: none; cursor: pointer;" class="hover:underline">
+                                        ✓ Terima
+                                    </button>
+                                    <button @click="tolakPesanan(trx.id)" style="color: #ba1a1a; font-size: 0.8rem; font-weight: 700; background: none; border: none; cursor: pointer;" class="hover:underline">
+                                        ✕ Tolak
+                                    </button>
+                                </template>
+                            </div>
                         </td>
                     </tr>
                     <tr v-if="!transaksi || transaksi.length === 0">
-                        <td colspan="6" style="padding: 40px; text-align: center; color: #90a4b4;">
+                        <td colspan="5" style="padding: 40px; text-align: center; color: #90a4b4;">
                             Belum ada transaksi.
                         </td>
                     </tr>
@@ -145,12 +170,10 @@ function lihatDetail(trx: any) {
             </table>
         </div>
 
-        <!-- Modal Kasir -->
         <div v-if="showKasir" class="fixed inset-0 flex items-center justify-center z-50" style="background: rgba(11,28,48,0.5);">
             <div style="background: #fff; border-radius: 16px; padding: 24px; width: 100%; max-width: 520px; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
-                <h2 style="font-size: 1.1rem; font-weight: 700; color: #0b1c30; margin-bottom: 20px;">🧾 Transaksi Baru</h2>
+                <h2 style="font-size: 1.1rem; font-weight: 700; color: #0b1c30; margin-bottom: 20px;">🧾 Transaksi Kasir Baru</h2>
 
-                <!-- Pilih item -->
                 <div class="flex gap-2 mb-3">
                     <select
                         v-model="selectedItemId"
@@ -176,7 +199,6 @@ function lihatDetail(trx: any) {
                     </button>
                 </div>
 
-                <!-- Keranjang -->
                 <div style="border: 1px solid #e5eeff; border-radius: 8px; max-height: 180px; overflow-y: auto; margin-bottom: 16px;">
                     <div v-if="keranjang.length === 0" style="padding: 16px; text-align: center; color: #90a4b4; font-size: 0.875rem;">
                         Belum ada item di keranjang
@@ -203,14 +225,13 @@ function lihatDetail(trx: any) {
                     </div>
                 </div>
 
-                <!-- Total & Bayar -->
                 <div style="border-top: 1px solid #e5eeff; padding-top: 14px; display: flex; flex-direction: column; gap: 10px; font-size: 0.875rem;">
                     <div style="display: flex; justify-content: space-between;">
                         <span style="color: #3f484a;">Total Belanja</span>
                         <span style="font-weight: 700; color: #0b1c30;">Rp {{ totalBelanja.toLocaleString('id-ID') }}</span>
                     </div>
                     <div style="display: flex; align-items: center; justify-content: space-between;">
-                        <label style="color: #3f484a;">Bayar</label>
+                        <label style="color: #3f484a;">Bayar Cash</label>
                         <input
                             v-model.number="bayar"
                             type="number"
@@ -241,13 +262,12 @@ function lihatDetail(trx: any) {
                         :style="(keranjang.length === 0 || kembalian < 0) ? 'opacity: 0.4; cursor: not-allowed;' : 'opacity: 1; cursor: pointer;'"
                         class="hover:opacity-90"
                     >
-                        Simpan Transaksi
+                        Selesaikan Kasir
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- Modal Detail -->
         <div v-if="showDetail && selectedTrx" class="fixed inset-0 flex items-center justify-center z-50" style="background: rgba(11,28,48,0.5);">
             <div style="background: #fff; border-radius: 16px; padding: 24px; width: 100%; max-width: 440px; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
                 <h2 style="font-size: 1.1rem; font-weight: 700; color: #0b1c30; margin-bottom: 20px;">Detail Transaksi</h2>
@@ -255,6 +275,10 @@ function lihatDetail(trx: any) {
                     <div style="display: flex; justify-content: space-between;">
                         <span style="color: #3f484a;">No. Invoice</span>
                         <span style="font-weight: 700; color: #004349; font-family: monospace;">{{ selectedTrx.nomor_invoice }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #3f484a;">Sumber</span>
+                        <span style="font-weight: 600; color: #0b1c30;">{{ selectedTrx.sumber === 'online' ? 'Web Online' : 'Kasir Offline' }}</span>
                     </div>
                     <div style="display: flex; justify-content: space-between;">
                         <span style="color: #3f484a;">Tanggal</span>
@@ -276,16 +300,24 @@ function lihatDetail(trx: any) {
                             <span style="color: #0b1c30;">Rp {{ Number(selectedTrx.total_harga).toLocaleString('id-ID') }}</span>
                         </div>
                         <div style="display: flex; justify-content: space-between;">
-                            <span style="color: #3f484a;">Bayar</span>
+                            <span style="color: #3f484a;">Pembayaran (Cash/Transfer)</span>
                             <span style="color: #0b1c30;">Rp {{ Number(selectedTrx.bayar).toLocaleString('id-ID') }}</span>
                         </div>
-                        <div style="display: flex; justify-content: space-between;">
+                        <div style="display: flex; justify-content: space-between;" v-if="selectedTrx.sumber === 'offline'">
                             <span style="font-weight: 700; color: #0b1c30;">Kembalian</span>
                             <span style="font-weight: 700; color: #004349;">Rp {{ Number(selectedTrx.kembalian).toLocaleString('id-ID') }}</span>
                         </div>
                     </div>
                 </div>
-                <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+                <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px;">
+                    <a
+                        :href="`/struk/${selectedTrx.id}`"
+                        target="_blank"
+                        style="padding: 8px 18px; border-radius: 8px; background: #004349; color: #fff; font-size: 0.875rem; font-weight: 600; border: none; cursor: pointer; text-decoration: none;"
+                        class="hover:opacity-90"
+                    >
+                        🖨️ Cetak Struk
+                    </a>
                     <button
                         @click="showDetail = false"
                         style="padding: 8px 18px; border-radius: 8px; border: 1px solid #bfc8c9; font-size: 0.875rem; font-weight: 600; color: #3f484a; background: #fff; cursor: pointer;"

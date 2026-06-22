@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
 defineProps<{
     transaksi: {
@@ -20,9 +21,12 @@ defineProps<{
             nama_item: string
             harga: number
             qty: number
+            subtotal: number  // <-- ini yang ditambahin
         }>;
     };
 }>();
+const page = usePage();
+const role = computed(() => (page.props.auth as any)?.user?.role);
 </script>
 
 <template>
@@ -84,15 +88,37 @@ defineProps<{
                         </span>
                     </div>
 
+                    <!-- Tombol cetak -->
+                    <button
+                        onclick="window.print()"
+                        style="width: 100%; border: 1px solid #004349; color: #004349; text-align: center; padding: 12px; border-radius: 8px; font-size: 0.875rem; font-weight: 600; background: transparent; cursor: pointer; margin-top: 8px;"
+                    >
+                        🖨️ Cetak Struk
+                    </button>
+
                     <!-- Tombol aksi -->
-                    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 24px;">
+                    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
+                        
+                        <!-- Hanya untuk pembeli -->
                         <Link
+                            v-if="role === 'pembeli'"
                             href="/pesanan-saya"
                             style="background: #004349; color: #fff; text-align: center; padding: 12px; border-radius: 8px; font-size: 0.875rem; font-weight: 600; display: block; text-decoration: none;"
                             class="hover:opacity-90 transition-opacity"
                         >
                             Lihat Pesanan Saya
                         </Link>
+
+                        <!-- Untuk pegawai/admin: balik ke transaksi -->
+                        <Link
+                            v-else-if="role === 'pegawai' || role === 'admin'"
+                            href="/transaksi"
+                            style="background: #004349; color: #fff; text-align: center; padding: 12px; border-radius: 8px; font-size: 0.875rem; font-weight: 600; display: block; text-decoration: none;"
+                            class="hover:opacity-90 transition-opacity"
+                        >
+                            Kembali ke Transaksi
+                        </Link>
+
                         <Link
                             href="/"
                             style="border: 1px solid #bfc8c9; color: #0b1c30; text-align: center; padding: 12px; border-radius: 8px; font-size: 0.875rem; font-weight: 600; display: block; text-decoration: none;"
