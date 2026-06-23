@@ -23,8 +23,8 @@ class Transaksi extends Model
     'user_id',
     'sumber',
     'status',
-    'metode_bayar',   // tambah
-    'kode_unik',      // tambah
+    'metode_bayar',   
+    'kode_unik',      
     'total_harga',
     'bayar',
     'kembalian',

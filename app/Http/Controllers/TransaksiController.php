@@ -13,9 +13,7 @@ use Inertia\Inertia;
 
 class TransaksiController extends Controller
 {
-    /**
-     * READ: Menampilkan daftar riwayat transaksi ke halaman Vue.
-     */
+    
     public function index()
     {
         $transaksi = Transaksi::with('detailTransaksi')->latest()->get();
@@ -27,12 +25,10 @@ class TransaksiController extends Controller
         ]);
     }
 
-    /**
-     * CREATE: Menyimpan transaksi baru (Logika Kasir Final - Anti Race Condition)
-     */
+    
     public function store(Request $request)
     {
-        // 1. Validasi data
+        
         $request->validate([
             'user_id' => 'required|integer',
             'bayar' => 'required|numeric|min:0',
@@ -41,16 +37,14 @@ class TransaksiController extends Controller
             'items.*.qty' => 'required|integer|min:1',
         ]);
 
-        // Mulai "Ruang Kedap Udara" (Database Transaction)
+       
         DB::beginTransaction();
 
         try {
             $total_harga = 0;
             $items_dibelis = [];
 
-            // 2. Cek stok dan hitung total belanjaan (DENGAN LOCKING)
             foreach ($request->items as $beli) {
-                // PERBAIKAN ISU #5: Mengunci baris item agar tidak direbut transaksi lain
                 $item_db = Item::lockForUpdate()->find($beli['item_id']);
 
                 if ($item_db->stok < $beli['qty']) {
@@ -60,7 +54,6 @@ class TransaksiController extends Controller
                 $subtotal = $item_db->harga_jual * $beli['qty'];
                 $total_harga += $subtotal;
 
-                // Simpan data sementara ke array
                 $items_dibelis[] = [
                     'item' => $item_db,
                     'qty' => $beli['qty'],
@@ -68,30 +61,30 @@ class TransaksiController extends Controller
                 ];
             }
 
-            // Cek apakah uangnya cukup
+            
             if ($request->bayar < $total_harga) {
                 throw new \Exception("Uang pembayaran kurang! Total belanja: Rp" . number_format($total_harga, 0, ',', '.'));
             }
 
-            // 3. Buat Nota Induk (Transaksi)
+            
             $transaksi = Transaksi::create([
                 'nomor_invoice' => 'INV-' . Carbon::now()->format('Ymd') . '-' . rand(1000, 9999),
                 'user_id' => $request->user_id,
-                'sumber' => 'offline', // PERBAIKAN ISU #4: Identifikasi transaksi kasir
-                'status' => 'selesai', // Transaksi kasir langsung dianggap selesai
+                'sumber' => 'offline', 
+                'status' => 'selesai', 
                 'total_harga' => $total_harga,
                 'bayar' => $request->bayar,
                 'kembalian' => $request->bayar - $total_harga,
                 'tanggal_transaksi' => Carbon::now(),
             ]);
 
-            // 4. Proses Eksekusi Barang (Detail, Potong Stok, & Mutasi)
+            
             foreach ($items_dibelis as $data) {
                 $item = $data['item'];
                 $qty = $data['qty'];
                 $stok_awal = $item->stok;
 
-                // A. Catat ke Detail Transaksi
+
                 DetailTransaksi::create([
                     'transaksi_id' => $transaksi->id,
                     'item_id' => $item->id,
@@ -101,11 +94,11 @@ class TransaksiController extends Controller
                     'subtotal' => $data['subtotal'],
                 ]);
 
-                // B. Potong Stok Utama
+                
                 $item->stok = $stok_awal - $qty;
                 $item->save();
 
-                // C. Catat Riwayat Mutasi Stok
+              
                 MutasiStok::create([
                     'item_id' => $item->id,
                     'user_id' => $request->user_id,
@@ -119,22 +112,19 @@ class TransaksiController extends Controller
                 ]);
             }
 
-            // Kunci semua perubahan secara permanen
+            
             DB::commit();
 
             return redirect()->route('transaksi.index');
 
         } catch (\Exception $e) {
-            // Batalkan semua proses jika ada error
             DB::rollBack();
 
             return redirect()->back()->withErrors(['transaksi_error' => $e->getMessage()]);
         }
     }
 
-    // =========================================================================
-    // FUNGSI DI BAWAH INI DINONAKTIFKAN KARENA UI MENGGUNAKAN POP-UP (MODAL) VUE
-    // =========================================================================
+    
 
     public function show(Transaksi $transaksi)
     {
@@ -156,20 +146,16 @@ class TransaksiController extends Controller
         return redirect()->route('transaksi.index');
     }
 
-    /**
-     * DELETE: Mencegah penghapusan untuk integritas laporan keuangan
-     */
+    
     public function destroy(Transaksi $transaksi)
     {
-        // PERBAIKAN ISU #6: Menolak perintah hapus secara elegan
+        
         return redirect()->back()->withErrors([
             'error' => 'Akses ditolak! Transaksi yang sudah tersimpan tidak dapat dihapus untuk menjaga integritas laporan mutasi dan keuangan.'
         ]);
     }
 
-    /**
-     * EKSEKUSI ADMIN: Menerima pesanan online
-     */
+    
     public function terima(Transaksi $transaksi)
     {
         if ($transaksi->status !== 'menunggu_konfirmasi') {
@@ -181,9 +167,7 @@ class TransaksiController extends Controller
         return redirect()->back()->with('success', 'Pesanan online berhasil diverifikasi dan diselesaikan.');
     }
 
-    /**
-     * EKSEKUSI ADMIN: Menolak pesanan online (Stok wajib kembali)
-     */
+    
     public function tolak(Transaksi $transaksi)
     {
         if ($transaksi->status !== 'menunggu_konfirmasi') {
@@ -193,7 +177,7 @@ class TransaksiController extends Controller
         DB::beginTransaction();
 
         try {
-            // 1. Kembalikan stok item
+            
             $transaksi->load('detailTransaksi');
             foreach ($transaksi->detailTransaksi as $detail) {
                 $item = Item::lockForUpdate()->find($detail->item_id);
@@ -202,7 +186,7 @@ class TransaksiController extends Controller
                 }
             }
 
-            // 2. Ubah status jadi batal
+            
             $transaksi->update(['status' => 'dibatalkan']);
 
             DB::commit();

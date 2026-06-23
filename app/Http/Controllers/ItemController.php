@@ -10,9 +10,7 @@ use Inertia\Inertia;
 
 class ItemController extends Controller
 {
-    /**
-     * READ: Menampilkan semua daftar barang ke halaman Vue.
-     */
+    
     public function index()
     {
         $items = Item::with('kodeItem')->get();
@@ -24,9 +22,7 @@ class ItemController extends Controller
         ]);
     }
 
-    /**
-     * CREATE: Menyimpan data barang baru (Dilengkapi Validasi Keamanan)
-     */
+    
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -43,9 +39,7 @@ class ItemController extends Controller
         return redirect()->route('items.index')->with('success', 'Barang berhasil ditambahkan.');
     }
 
-    /**
-     * UPDATE: Memperbarui data barang (Dilengkapi Validasi Keamanan)
-     */
+    
     public function update(Request $request, Item $item)
     {
         $validated = $request->validate([
@@ -61,12 +55,10 @@ class ItemController extends Controller
         return redirect()->route('items.index')->with('success', 'Barang berhasil diperbarui.');
     }
 
-    /**
-     * DELETE: Menghapus data barang (Mencegah Kehancuran Relasi Data)
-     */
+   
     public function destroy(Item $item)
     {
-        // Deteksi apakah barang sudah pernah ditransaksikan
+    
         $pernahDijual = DetailTransaksi::where('item_id', $item->id)->exists();
         $punyaMutasi = MutasiStok::where('item_id', $item->id)->exists();
 
@@ -80,9 +72,7 @@ class ItemController extends Controller
         return redirect()->route('items.index')->with('success', 'Barang berhasil dihapus.');
     }
 
-    // =========================================================================
-    // FUNGSI KOSONG KkARENA MENGGUNAKAN SISTEM POP-UP (MODAL)
-    // =========================================================================
+    
     public function create() { return redirect()->route('items.index'); }
     public function edit(Item $item) { return redirect()->route('items.index'); }
     public function show(Item $item) { return redirect()->route('items.index'); }

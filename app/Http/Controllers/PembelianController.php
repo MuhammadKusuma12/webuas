@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Item;
 use App\Models\Transaksi;
-use App\Models\MutasiStok; // TAMBAHAN WAJIB: Memanggil tabel Buku Besar
+use App\Models\MutasiStok; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -28,7 +28,6 @@ class PembelianController extends Controller
         try {
             $transaksi = DB::transaction(function () use ($validated, $item) {
 
-                // 1. Kunci baris item ini
                 $item = Item::lockForUpdate()->find($item->id);
 
                 if ($validated['qty'] > $item->stok) {
@@ -37,7 +36,6 @@ class PembelianController extends Controller
 
                 $subtotal = $item->harga_jual * $validated['qty'];
 
-                // 2. Generate kode unik anti-tabrakan
                 do {
                     $kodeUnik = rand(100, 999);
                     $sudahDipakai = Transaksi::where('kode_unik', $kodeUnik)
@@ -45,7 +43,6 @@ class PembelianController extends Controller
                         ->exists();
                 } while ($sudahDipakai);
 
-                // 3. Buat Nota Transaksi Terlebih Dahulu
                 $transaksi = Transaksi::create([
                     'nomor_invoice'     => 'INV-' . strtoupper(uniqid()),
                     'user_id'           => Auth::id(),
@@ -66,11 +63,11 @@ class PembelianController extends Controller
                     'qty'       => $validated['qty'],
                 ]);
 
-                // 4. RESERVASI: Potong Stok
+                
                 $stok_awal = $item->stok;
                 $item->decrement('stok', $validated['qty']);
 
-                // 5. PENAMBALAN LOGIKA: Catat ke Buku Besar (Mutasi Stok)
+                
                 MutasiStok::create([
                     'item_id'        => $item->id,
                     'user_id'        => Auth::id(),
