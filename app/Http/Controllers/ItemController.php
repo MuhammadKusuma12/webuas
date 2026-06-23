@@ -31,9 +31,12 @@ class ItemController extends Controller
     {
         $validated = $request->validate([
             'kode_item_id' => 'required|exists:kode_items,id',
+            'kode_item' => 'required|string|max:50',
             'nama_item' => 'required|string|max:255',
+            'harga_beli' => 'nullable|numeric|min:0',
             'harga_jual' => 'required|numeric|min:0',
             'stok' => 'required|integer|min:0',
+            'stok_minimum' => 'nullable|integer|min:0',
         ]);
 
         Item::create($validated);
@@ -48,8 +51,10 @@ class ItemController extends Controller
         $validated = $request->validate([
             'kode_item_id' => 'required|exists:kode_items,id',
             'nama_item' => 'required|string|max:255',
+            'harga_beli' => 'nullable|numeric|min:0',
             'harga_jual' => 'required|numeric|min:0',
             'stok' => 'required|integer|min:0',
+            'stok_minimum' => 'nullable|integer|min:0',
         ]);
 
         $item->update($validated);

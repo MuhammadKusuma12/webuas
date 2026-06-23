@@ -10,7 +10,6 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { register } from '@/routes';
 import { store } from '@/routes/login';
-import { request } from '@/routes/password';
 
 defineOptions({
     layout: {
@@ -49,14 +48,14 @@ defineProps<{
 
                 <!-- Brand -->
                 <div class="flex flex-col items-center mb-10">
-                    <div class="w-16 h-16 bg-[#004349] rounded-full flex items-center justify-center mb-4 shadow-sm">
-                        <span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1; font-size:36px;">set_meal</span>
+                    <div class="w-16 h-16 rounded-full overflow-hidden mb-4 shadow-sm">
+                        <img src="/images/logo_toko_koi.jpg" alt="Logo" style="width: 100%; height: 100%; object-fit: cover;" />
                     </div>
                     <h1 class="text-2xl font-semibold text-[#004349] tracking-tight" style="font-family: 'Plus Jakarta Sans', sans-serif;">
                         Toko Ikan Koi
                     </h1>
                     <p class="text-sm text-[#3f484a] mt-1" style="font-family: 'Inter', sans-serif;">
-                        Serene Professionalism in Every Fins
+                        Sistem Manajemen Toko
                     </p>
                 </div>
 
@@ -112,11 +111,11 @@ defineProps<{
                             <InputError :message="errors.password" />
                         </div>
 
-                        <!-- Remember me -->
+                        <!-- Ingat Saya -->
                         <div class="flex items-center justify-between">
                             <Label for="remember" class="flex items-center space-x-3 cursor-pointer">
                                 <Checkbox id="remember" name="remember" :tabindex="3" />
-                                <span class="text-sm text-[#3f484a]">Remember me</span>
+                                <span class="text-sm text-[#3f484a]">Ingat saya</span>
                             </Label>
                         </div>
 
@@ -129,7 +128,7 @@ defineProps<{
                         >
                             <Spinner v-if="processing" />
                             <template v-else>
-                                Log in
+                                Masuk
                                 <span class="material-symbols-outlined" style="font-size:20px;">login</span>
                             </template>
                         </Button>
@@ -145,7 +144,7 @@ defineProps<{
                             :tabindex="5"
                             class="flex-1 text-center py-3 border border-[#004349] text-[#004349] text-sm font-medium rounded-lg hover:bg-[#abeef6]/30 transition-colors"
                         >
-                            Register
+                            Daftar
                         </TextLink>
                     </div>
                 </div>
@@ -154,8 +153,8 @@ defineProps<{
             <!-- Footer -->
             <footer class="mt-8 text-center">
                 <p class="text-xs text-[#6f797a]">
-                    © 2024 Toko Ikan Koi.<br>
-                    <span class="opacity-70 italic">Building aquatic excellence, one koi at a time.</span>
+                    © 2026 Toko Ikan Koi.<br>
+                    <span class="opacity-70 italic">Kualitas terbaik untuk ikan koi pilihanmu.</span>
                 </p>
             </footer>
         </main>

@@ -49,18 +49,19 @@ function formatRupiah(num: number) {
 
     <div class="flex flex-col gap-8 p-6 min-h-full bg-[#f8f9ff]">
 
+        <!-- Header -->
         <header class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div>
                 <h2 class="text-[32px] font-semibold leading-10 text-[#0b1c30]" style="font-family: 'Plus Jakarta Sans', sans-serif;">
-                    Dashboard Overview
+                    Ringkasan Toko
                 </h2>
                 <p class="text-base text-[#3f484a] mt-1" style="font-family: 'Inter', sans-serif;">
-                    Welcome back, {{ $page.props.auth.user.nama || 'Administrator' }}. Here is your shop summary.
+                    Selamat datang, {{ $page.props.auth.user.nama || 'Administrator' }}. Berikut ringkasan toko hari ini.
                 </p>
             </div>
             <div class="flex gap-3">
-                <Link href="/" class="flex items-center gap-2 px-4 py-2 bg-[#dce9ff] border border-[#bfc8c9] rounded-lg text-sm font-semibold text-[#0b1c30] hover:bg-[#cce0ff] transition-colors shadow-sm">
-                    <span class="material-symbols-outlined text-[#0b1c30]" style="font-size:18px;">storefront</span>
+                <Link href="/" class="flex items-center gap-2 px-4 py-2 bg-white border border-[#bfc8c9] rounded-lg text-sm font-semibold text-[#004349] hover:bg-[#e5eeff] transition-colors shadow-sm">
+                    <span class="material-symbols-outlined" style="font-size:18px;">storefront</span>
                     Lihat Toko
                 </Link>
                 <button class="flex items-center gap-2 px-4 py-2 bg-white border border-[#bfc8c9] rounded-lg text-sm font-medium text-[#0b1c30] hover:bg-[#e5eeff] transition-colors shadow-sm">
@@ -73,7 +74,7 @@ function formatRupiah(num: number) {
                     class="flex items-center gap-2 px-5 py-2 bg-[#004349] text-white rounded-lg text-sm font-semibold hover:bg-[#0d5c63] active:scale-95 transition-all shadow-sm"
                 >
                     <span class="material-symbols-outlined" style="font-size:18px;">add</span>
-                    Input New Fish
+                    Tambah Item
                 </Link>
             </div>
         </header>
@@ -87,10 +88,10 @@ function formatRupiah(num: number) {
                     <div class="bg-[#abeef6] p-2.5 rounded-lg">
                         <span class="material-symbols-outlined text-[#004349]" style="font-variation-settings: 'FILL' 1; font-size:20px;">inventory_2</span>
                     </div>
-                    <span class="text-[10px] font-semibold text-[#004f55] tracking-wide">Stok aktif</span>
+                    <span class="text-[10px] font-semibold text-[#004f55] bg-[#e5eeff] px-2 py-0.5 rounded-full tracking-wide">Stok aktif</span>
                 </div>
                 <div>
-                    <p class="text-[10px] font-semibold uppercase tracking-widest text-[#3f484a]">Total Stok Ikan</p>
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-[#3f484a]">Total Stok Item</p>
                     <p class="text-4xl font-bold text-[#004349] mt-1 leading-none">{{ totalStok }}</p>
                 </div>
             </div>
@@ -101,7 +102,7 @@ function formatRupiah(num: number) {
                     <div class="bg-[#ffdbce] p-2.5 rounded-lg">
                         <span class="material-symbols-outlined text-[#934a29]" style="font-variation-settings: 'FILL' 1; font-size:20px;">payments</span>
                     </div>
-                    <span class="text-[10px] font-semibold text-[#934a29] tracking-wide">Sukses</span>
+                    <span class="text-[10px] font-semibold text-[#934a29] bg-[#ffdbce] px-2 py-0.5 rounded-full tracking-wide">Selesai</span>
                 </div>
                 <div>
                     <p class="text-[10px] font-semibold uppercase tracking-widest text-[#3f484a]">Total Transaksi</p>
@@ -113,45 +114,44 @@ function formatRupiah(num: number) {
             <div class="zen-stat-card bg-white rounded-xl p-5 shadow-sm border border-[#e5eeff] border-l-4 border-l-[#004443] flex flex-col justify-between h-40 hover:shadow-md transition-shadow">
                 <div class="flex justify-between items-start">
                     <div class="bg-[#98f2f0] p-2.5 rounded-lg">
-                        <span class="material-symbols-outlined text-[#004443]" style="font-variation-settings: 'FILL' 1; font-size:20px;">set_meal</span>
+                        <span class="material-symbols-outlined text-[#004443]" style="font-variation-settings: 'FILL' 1; font-size:20px;">category</span>
                     </div>
+                    <span class="text-[10px] font-semibold text-[#004443] bg-[#98f2f0] px-2 py-0.5 rounded-full tracking-wide">Kategori</span>
                 </div>
                 <div>
-                    <p class="text-[10px] font-semibold uppercase tracking-widest text-[#3f484a]">Total Jenis Koi</p>
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-[#3f484a]">Total Jenis Item</p>
                     <p class="text-4xl font-bold text-[#004443] mt-1 leading-none">{{ totalJenis }}</p>
                 </div>
             </div>
 
             <!-- Pendapatan Hari Ini -->
-            <div class="zen-stat-card bg-white rounded-xl p-5 shadow-sm border border-[#e5eeff] border-l-4 border-l-[#7c3aed] flex flex-col justify-between min-h-[160px] hover:shadow-md transition-shadow">
+            <div class="zen-stat-card bg-white rounded-xl p-5 shadow-sm border border-[#e5eeff] border-l-4 border-l-[#004349] flex flex-col justify-between h-40 hover:shadow-md transition-shadow">
                 <div class="flex justify-between items-start">
-                    <div class="bg-[#ede9fe] p-2.5 rounded-lg">
-                        <span class="material-symbols-outlined text-[#7c3aed]" style="font-variation-settings: 'FILL' 1; font-size:20px;">today</span>
+                    <div class="bg-[#abeef6] p-2.5 rounded-lg">
+                        <span class="material-symbols-outlined text-[#004349]" style="font-variation-settings: 'FILL' 1; font-size:20px;">today</span>
                     </div>
-                    <span class="text-[10px] font-semibold text-[#7c3aed] tracking-wide">Hari ini</span>
+                    <span class="text-[10px] font-semibold text-[#004f55] bg-[#e5eeff] px-2 py-0.5 rounded-full tracking-wide">Hari ini</span>
                 </div>
                 <div>
-                    <p class="text-[9px] font-semibold uppercase tracking-widest text-[#3f484a]">Pendapatan Hari Ini</p>
-                    <p class="text-[9px] font-semibold text-[#7c3aed]">Rp</p>
-                    <p class="text-lg font-bold text-[#7c3aed] leading-tight">
-                        {{ Number(pendapatanHariIni).toLocaleString('id-ID') }}
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-[#3f484a]">Pendapatan Hari Ini</p>
+                    <p class="text-xl font-bold text-[#004349] mt-1 leading-tight">
+                        {{ formatRupiah(pendapatanHariIni) }}
                     </p>
                 </div>
             </div>
 
             <!-- Pendapatan Bulan Ini -->
-            <div class="zen-stat-card bg-white rounded-xl p-5 shadow-sm border border-[#e5eeff] border-l-4 border-l-[#0369a1] flex flex-col justify-between min-h-[160px] hover:shadow-md transition-shadow">
+            <div class="zen-stat-card bg-white rounded-xl p-5 shadow-sm border border-[#e5eeff] border-l-4 border-l-[#934a29] flex flex-col justify-between h-40 hover:shadow-md transition-shadow">
                 <div class="flex justify-between items-start">
-                    <div class="bg-[#e0f2fe] p-2.5 rounded-lg">
-                        <span class="material-symbols-outlined text-[#0369a1]" style="font-variation-settings: 'FILL' 1; font-size:20px;">calendar_month</span>
+                    <div class="bg-[#ffdbce] p-2.5 rounded-lg">
+                        <span class="material-symbols-outlined text-[#934a29]" style="font-variation-settings: 'FILL' 1; font-size:20px;">calendar_month</span>
                     </div>
-                    <span class="text-[10px] font-semibold text-[#0369a1] tracking-wide">Bulan ini</span>
+                    <span class="text-[10px] font-semibold text-[#934a29] bg-[#ffdbce] px-2 py-0.5 rounded-full tracking-wide">Bulan ini</span>
                 </div>
                 <div>
-                    <p class="text-[9px] font-semibold uppercase tracking-widest text-[#3f484a]">Pendapatan Bulan Ini</p>
-                    <p class="text-[9px] font-semibold text-[#0369a1]">Rp</p>
-                    <p class="text-lg font-bold text-[#0369a1] leading-tight">
-                        {{ Number(pendapatanBulanIni).toLocaleString('id-ID') }}
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-[#3f484a]">Pendapatan Bulan Ini</p>
+                    <p class="text-xl font-bold text-[#934a29] mt-1 leading-tight">
+                        {{ formatRupiah(pendapatanBulanIni) }}
                     </p>
                 </div>
             </div>
@@ -161,19 +161,20 @@ function formatRupiah(num: number) {
         <!-- Tabel + Sidebar -->
         <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
+            <!-- Tabel Transaksi -->
             <div class="lg:col-span-2 bg-white rounded-xl border border-[#e5eeff] shadow-sm overflow-hidden">
                 <div class="flex items-center justify-between px-6 py-4 border-b border-[#e5eeff]">
                     <h3 class="text-lg font-semibold text-[#0b1c30]" style="font-family: 'Plus Jakarta Sans', sans-serif;">
                         Transaksi Terbaru
                     </h3>
-                    <button class="text-sm font-medium text-[#004349] hover:underline">
-                        View All Records
-                    </button>
+                    <Link href="/transaksi" class="text-sm font-medium text-[#004349] hover:underline">
+                        Lihat Semua
+                    </Link>
                 </div>
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="bg-[#f1f5f9] text-[#3f484a] text-xs font-semibold uppercase tracking-wider">
-                            <th class="px-6 py-3 text-left">Kode Transaksi</th>
+                            <th class="px-6 py-3 text-left">No. Invoice</th>
                             <th class="px-6 py-3 text-left">Total Harga</th>
                             <th class="px-6 py-3 text-left">Tanggal</th>
                             <th class="px-6 py-3 text-left">Aksi</th>
@@ -185,14 +186,14 @@ function formatRupiah(num: number) {
                             :key="trx.id"
                             class="border-b border-[#f1f5f9] last:border-0 hover:bg-[#f8f9ff] transition-colors"
                         >
-                            <td class="px-6 py-5 font-medium text-[#0b1c30]">{{ trx.nomor_invoice }}</td>
-                            <td class="px-6 py-5">
-                                <span class="inline-block bg-[#fd9e77] text-white text-xs font-semibold px-3 py-1 rounded-full">
+                            <td class="px-6 py-4 font-medium text-[#0b1c30]">{{ trx.nomor_invoice }}</td>
+                            <td class="px-6 py-4">
+                                <span class="inline-block bg-[#e5eeff] text-[#004349] text-xs font-semibold px-3 py-1 rounded-full">
                                     {{ formatRupiah(trx.total_harga) }}
                                 </span>
                             </td>
-                            <td class="px-6 py-5 text-[#3f484a]">{{ formatDate(trx.created_at) }}</td>
-                            <td class="px-6 py-5">
+                            <td class="px-6 py-4 text-[#3f484a]">{{ formatDate(trx.created_at) }}</td>
+                            <td class="px-6 py-4">
                                 <button class="text-[#6f797a] hover:text-[#004349] transition-colors">
                                     <span class="material-symbols-outlined" style="font-size:20px;">visibility</span>
                                 </button>
@@ -207,48 +208,39 @@ function formatRupiah(num: number) {
                 </table>
             </div>
 
-            <div class="flex flex-col gap-6">
+            <!-- Sidebar Kanan -->
+            <div class="flex flex-col gap-4">
 
-                <div class="relative rounded-xl overflow-hidden h-48 bg-[#004349] shadow-md flex flex-col justify-end p-5">
-                    <div class="absolute inset-0 bg-gradient-to-t from-[#002023]/90 via-[#004349]/50 to-transparent z-10"></div>
-                    <div class="relative z-20">
-                        <span class="inline-block bg-[#934a29] text-white text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded mb-2">
-                            Premium Stock
-                        </span>
-                        <h4 class="text-lg font-bold text-white leading-tight">Kohaku Grade AAA</h4>
-                        <p class="text-xs text-[#abeef6] mt-0.5">Latest addition. Imported from Niigata.</p>
-                        <button class="mt-3 w-full bg-white text-[#004349] text-sm font-semibold py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-[#abeef6] transition-colors">
-                            <span class="material-symbols-outlined" style="font-size:16px;">photo_library</span>
-                            View Gallery
-                        </button>
+                <!-- Quick Actions -->
+                <div class="bg-white rounded-xl border border-[#e5eeff] shadow-sm p-5">
+                    <h4 class="text-base font-semibold text-[#0b1c30] mb-4" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+                        Aksi Cepat
+                    </h4>
+                    <div class="flex flex-col gap-2">
+                        <Link href="/transaksi" class="flex items-center gap-3 px-4 py-3 bg-[#004349] text-white rounded-lg text-sm font-semibold hover:bg-[#0d5c63] transition-colors">
+                            <span class="material-symbols-outlined" style="font-size:18px; font-variation-settings: 'FILL' 1;">add_shopping_cart</span>
+                            Transaksi Baru (Kasir)
+                        </Link>
+                        <Link href="/items" class="flex items-center gap-3 px-4 py-3 bg-[#e5eeff] text-[#004349] rounded-lg text-sm font-semibold hover:bg-[#dce9ff] transition-colors">
+                            <span class="material-symbols-outlined" style="font-size:18px; font-variation-settings: 'FILL' 1;">inventory_2</span>
+                            Kelola Item
+                        </Link>
+                        <Link href="/mutasi-stok" class="flex items-center gap-3 px-4 py-3 bg-[#e5eeff] text-[#004349] rounded-lg text-sm font-semibold hover:bg-[#dce9ff] transition-colors">
+                            <span class="material-symbols-outlined" style="font-size:18px; font-variation-settings: 'FILL' 1;">swap_vert</span>
+                            Lihat Mutasi Stok
+                        </Link>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-xl border border-[#e5eeff] p-5 shadow-sm border-t-4 border-t-[#004443]">
-                    <div class="flex items-center gap-2 mb-4">
-                        <span class="material-symbols-outlined text-[#004349]" style="font-size:20px;">trending_up</span>
-                        <h4 class="text-base font-semibold text-[#0b1c30]">Market Trends</h4>
-                    </div>
-                    <div class="space-y-4">
-                        <div>
-                            <div class="flex justify-between items-center mb-1">
-                                <span class="text-sm text-[#3f484a]">Koi Food Sales</span>
-                                <span class="text-sm font-bold text-[#004349]">+15.4%</span>
-                            </div>
-                            <div class="w-full h-2 bg-[#e5eeff] rounded-full overflow-hidden">
-                                <div class="h-full bg-[#004349] rounded-full" style="width: 75%;"></div>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between items-center mb-1">
-                                <span class="text-sm text-[#3f484a]">Auction Activity</span>
-                                <span class="text-sm font-bold text-[#934a29]">+8.2%</span>
-                            </div>
-                            <div class="w-full h-2 bg-[#ffdbce] rounded-full overflow-hidden">
-                                <div class="h-full bg-[#934a29] rounded-full" style="width: 52%;"></div>
-                            </div>
-                        </div>
-                    </div>
+                <!-- Info Ringkasan -->
+                <div class="bg-[#004349] rounded-xl p-5 shadow-sm">
+                    <h4 class="text-sm font-semibold text-[#abeef6] uppercase tracking-widest mb-3">
+                        Total Pendapatan
+                    </h4>
+                    <p class="text-3xl font-bold text-white leading-tight">
+                        {{ formatRupiah(totalPendapatan) }}
+                    </p>
+                    <p class="text-xs text-[#90d2da] mt-2">Keseluruhan sejak toko dibuka</p>
                 </div>
 
             </div>

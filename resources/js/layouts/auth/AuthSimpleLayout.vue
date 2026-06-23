@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import { home } from '@/routes';
 defineProps<{
     title?: string;
@@ -18,12 +17,8 @@ defineProps<{
                         :href="home()"
                         class="flex flex-col items-center gap-2 font-medium"
                     >
-                        <div
-                            class="mb-1 flex h-9 w-9 items-center justify-center rounded-md bg-black"
-                        >
-                            <AppLogoIcon
-                                class="size-9 fill-current text-white"
-                            />
+                        <div class="mb-1 h-9 w-9 rounded-md overflow-hidden">
+                            <img src="/images/logo_toko_koi.jpg" alt="Logo" style="width: 100%; height: 100%; object-fit: cover;" />
                         </div>
                         <span class="text-lg font-bold">Toko Ikan Koi</span>
                     </Link>

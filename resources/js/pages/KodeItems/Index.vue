@@ -62,12 +62,12 @@ function hapus() {
 
 <template>
     <Head title="Kode Items" />
-    <div class="flex flex-col gap-5 p-6" style="font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;">
+    <div class="flex flex-col gap-5 p-6" style="font-family: 'Inter', sans-serif;">
 
         <!-- Header -->
         <div class="flex items-center justify-between">
             <div>
-                <h1 style="font-size: 1.5rem; font-weight: 700; color: #0b1c30;">Kode Items</h1>
+                <h1 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.5rem; font-weight: 700; color: #0b1c30;">Kode Items</h1>
                 <p style="font-size: 0.85rem; color: #3f484a; margin-top: 2px;">Kelola kategori dan kode ikan koi</p>
             </div>
             <button
@@ -80,24 +80,24 @@ function hapus() {
         </div>
 
         <!-- Tabel -->
-        <div style="background: #fff; border: 1px solid #bfc8c9; border-radius: 12px; overflow: hidden;">
+        <div style="background: #fff; border: 1px solid #e5eeff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
             <table class="w-full" style="font-size: 0.875rem; border-collapse: collapse;">
                 <thead>
-                    <tr style="background: #eff4ff;">
-                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #3f484a; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em;">No</th>
-                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #3f484a; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em;">Kode</th>
-                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #3f484a; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em;">Nama Kategori</th>
-                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #3f484a; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em;">Aksi</th>
+                    <tr style="background: #f1f5f9;">
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #3f484a; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em;">No</th>
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #3f484a; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em;">Kode</th>
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #3f484a; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em;">Nama Kategori</th>
+                        <th style="padding: 12px 16px; text-align: left; font-weight: 600; color: #3f484a; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr
                         v-for="(item, index) in kodeItems"
                         :key="item.id"
-                        style="border-top: 1px solid #e5eeff; transition: background 0.15s;"
+                        style="border-top: 1px solid #f1f5f9; transition: background 0.15s;"
                         class="hover:bg-[#f8f9ff]"
                     >
-                        <td style="padding: 12px 16px; color: #90a4b4; font-size: 0.8rem;">{{ index + 1 }}</td>
+                        <td style="padding: 12px 16px; color: #6f797a; font-size: 0.8rem;">{{ index + 1 }}</td>
                         <td style="padding: 12px 16px;">
                             <span style="background: #dce9ff; color: #004349; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; font-family: monospace;">
                                 {{ item.kode_prefix }}
@@ -124,7 +124,7 @@ function hapus() {
                         </td>
                     </tr>
                     <tr v-if="!kodeItems || kodeItems.length === 0">
-                        <td colspan="4" style="padding: 40px; text-align: center; color: #90a4b4;">
+                        <td colspan="4" style="padding: 40px; text-align: center; color: #6f797a;">
                             Belum ada kode item.
                         </td>
                     </tr>
@@ -135,7 +135,7 @@ function hapus() {
         <!-- Modal Tambah/Edit -->
         <div v-if="showModal" class="fixed inset-0 flex items-center justify-center z-50" style="background: rgba(11,28,48,0.5);">
             <div style="background: #fff; border-radius: 16px; padding: 24px; width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
-                <h2 style="font-size: 1.1rem; font-weight: 700; color: #0b1c30; margin-bottom: 20px;">
+                <h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.1rem; font-weight: 700; color: #0b1c30; margin-bottom: 20px;">
                     {{ isEdit ? 'Edit Kode Item' : 'Tambah Kode Item' }}
                 </h2>
                 <div class="flex flex-col gap-3">
@@ -144,7 +144,8 @@ function hapus() {
                         <input
                             v-model="form.kode_prefix"
                             placeholder="Contoh: KOI"
-                            style="width: 100%; border: 1px solid #bfc8c9; border-radius: 8px; padding: 8px 12px; font-size: 0.875rem; color: #0b1c30; outline: none; box-sizing: border-box;"
+                            class="focus:outline-none focus:ring-2 focus:ring-[#004349]/20 focus:border-[#004349]"
+                            style="width: 100%; border: 1px solid #bfc8c9; border-radius: 8px; padding: 8px 12px; font-size: 0.875rem; color: #0b1c30; box-sizing: border-box; transition: border-color 0.2s;"
                         />
                     </div>
                     <div>
@@ -152,7 +153,8 @@ function hapus() {
                         <input
                             v-model="form.nama_kode"
                             placeholder="Contoh: Ikan Koi"
-                            style="width: 100%; border: 1px solid #bfc8c9; border-radius: 8px; padding: 8px 12px; font-size: 0.875rem; color: #0b1c30; outline: none; box-sizing: border-box;"
+                            class="focus:outline-none focus:ring-2 focus:ring-[#004349]/20 focus:border-[#004349]"
+                            style="width: 100%; border: 1px solid #bfc8c9; border-radius: 8px; padding: 8px 12px; font-size: 0.875rem; color: #0b1c30; box-sizing: border-box; transition: border-color 0.2s;"
                         />
                     </div>
                 </div>
@@ -178,9 +180,11 @@ function hapus() {
         <!-- Modal Konfirmasi Hapus -->
         <div v-if="showDeleteConfirm" class="fixed inset-0 flex items-center justify-center z-50" style="background: rgba(11,28,48,0.5);">
             <div style="background: #fff; border-radius: 16px; padding: 24px; width: 100%; max-width: 360px; box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
-                <div class="text-3xl mb-3">🗑️</div>
-                <h2 style="font-size: 1.1rem; font-weight: 700; color: #0b1c30; margin-bottom: 8px;">Konfirmasi Hapus</h2>
-                <p style="font-size: 0.875rem; color: #3f484a; margin-bottom: 20px;">Apakah Anda yakin ingin menghapus kode item ini? Tindakan ini tidak dapat dibatalkan.</p>
+                <div style="width: 44px; height: 44px; background: #ffdad6; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 14px;">
+                    <span class="material-symbols-outlined" style="font-size: 22px; color: #ba1a1a; font-variation-settings: 'FILL' 1;">delete</span>
+                </div>
+                <h2 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.05rem; font-weight: 700; color: #0b1c30; margin-bottom: 6px;">Konfirmasi Hapus</h2>
+                <p style="font-size: 0.875rem; color: #3f484a; margin-bottom: 20px; line-height: 1.5;">Apakah Anda yakin ingin menghapus kode item ini? Tindakan ini tidak dapat dibatalkan.</p>
                 <div class="flex justify-end gap-2">
                     <button
                         @click="showDeleteConfirm = false"
@@ -202,3 +206,10 @@ function hapus() {
 
     </div>
 </template>
+
+<style scoped>
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    font-family: 'Material Symbols Outlined';
+}
+</style>
