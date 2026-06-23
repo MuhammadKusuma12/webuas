@@ -240,6 +240,7 @@ function formatRupiah(num: number) {
                 </div>
                 <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px;">
                     
+                    <a
                         :href="`/struk/${selectedTrx.id}`"
                         target="_blank"
                         style="display: flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: 8px; background: #004349; color: #fff; font-size: 0.875rem; font-weight: 600; text-decoration: none;"
